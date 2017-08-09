@@ -381,6 +381,12 @@ NSString *const SRHTTPResponseErrorKey = @"HTTPResponseStatusCode";
         return;
     }
 
+    if(responseCode == 302) {
+        NSString *locationHeader = CFBridgingRelease(CFHTTPMessageCopyHeaderFieldValue(_receivedHTTPHeaders, CFSTR("Location")));
+        [self _failWithRedirect:locationHeader];
+        return;
+    }
+
     if(![self _checkHandshake:_receivedHTTPHeaders]) {
         NSError *error = SRErrorWithCodeDescription(2133, @"Invalid Sec-WebSocket-Accept response.");
         [self _failWithError:error];
@@ -543,6 +549,26 @@ NSString *const SRHTTPResponseErrorKey = @"HTTPResponseStatusCode";
             [self closeConnection];
         });
     }];
+}
+
+- (void)_failWithRedirect:(NSString*)redirectUrl{
+    dispatch_async(_workQueue, ^{
+        if (self.readyState != SR_CLOSED) {
+            _failed = YES;
+            [self _performDelegateBlock:^{
+                if ([self.delegate respondsToSelector:@selector(webSocket:didRequestRedirect:)]) {
+                    [self.delegate webSocket:self didRequestRedirect:redirectUrl];
+                }
+            }];
+            
+            self.readyState = SR_CLOSED;
+            
+            SRFastLog(@"Failing with redirect %@", redirectUrl);
+            
+            [self closeConnection];
+            [self _scheduleCleanup];
+        }
+    });
 }
 
 - (void)_failWithError:(NSError *)error;

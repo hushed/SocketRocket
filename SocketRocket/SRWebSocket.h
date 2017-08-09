@@ -373,6 +373,14 @@ extern NSString *const SRHTTPResponseErrorKey;
 - (void)webSocket:(SRWebSocket *)webSocket didFailWithError:(NSError *)error;
 
 /**
+ Called when a given web socket encountered an error when connecting and the server requested a redirect
+
+ @param webSocket An instance of `SRWebSocket` that failed with an error.
+ @param redirectUrl     An instance of `NSString` indicating the requested location for the connection.
+ */
+- (void)webSocket:(SRWebSocket *)webSocket didRequestRedirect:(NSString *)redirectUrl;
+
+/**
  Called when a given web socket was closed.
 
  @param webSocket An instance of `SRWebSocket` that was closed.
