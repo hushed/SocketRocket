@@ -555,16 +555,16 @@ NSString *const SRHTTPResponseErrorKey = @"HTTPResponseStatusCode";
     dispatch_async(_workQueue, ^{
         if (self.readyState != SR_CLOSED) {
             _failed = YES;
-            [self _performDelegateBlock:^{
-                if ([self.delegate respondsToSelector:@selector(webSocket:didRequestRedirect:)]) {
-                    [self.delegate webSocket:self didRequestRedirect:redirectUrl];
+            [self.delegateController performDelegateBlock:^(id<SRWebSocketDelegate>  _Nullable delegate, SRDelegateAvailableMethods availableMethods) {
+                if (availableMethods.didRequestRedirect) {
+                    [delegate webSocket:self didRequestRedirect:redirectUrl];
                 }
             }];
-            
+
             self.readyState = SR_CLOSED;
-            
-            SRFastLog(@"Failing with redirect %@", redirectUrl);
-            
+
+            SRDebugLog(@"Failing with redirect %@", redirectUrl);
+
             [self closeConnection];
             [self _scheduleCleanup];
         }
