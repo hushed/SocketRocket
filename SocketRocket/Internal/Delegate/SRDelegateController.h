@@ -36,6 +36,7 @@ struct SRDelegateAvailableMethods {
     BOOL didReceiveMessageWithData;
     BOOL didOpen;
     BOOL didFailWithError;
+    BOOL didREquestRedirect;
     BOOL didCloseWithCode;
     BOOL didReceivePing;
     BOOL didReceivePong;
